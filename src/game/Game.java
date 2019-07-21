@@ -36,29 +36,84 @@ public class Game implements Runnable{
         window.getFrame().addKeyListener(KeyManager.getInstance());
 
         //Run Game
+        board[0][0] = 2;
         board[0][1] = 2;
         board[1][1] = 2;
         board[3][3] = 2;
     }
 
+    private boolean lock = false;
+
     private void tick(){
-        KeyManager.getInstance();
+        KeyManager.getInstance().tick();
+
+        if(KeyManager.getInstance().up && !lock){
+            moveUp();
+            lock = true;
+        }else if(KeyManager.getInstance().down && !lock){
+            moveDown();
+            lock = true;
+        }else if(KeyManager.getInstance().right && !lock){
+            moveRight();
+            lock = true;
+        }else if(KeyManager.getInstance().left && !lock){
+            moveLeft();
+            lock = true;
+        }
+
+        if(!KeyManager.getInstance().up && !KeyManager.getInstance().down && !KeyManager.getInstance().left && !KeyManager.getInstance().right){
+            lock = false;
+        }
     }
 
     private void moveUp(){
+        System.out.println("Move Up");
+        for(int i = 1; i < board[0].length; i++){
+            for(int j = 0; j < board.length; j++){
+                int current = board[j][i];
+                int above = board[j][i - 1];
 
+                if(current == above && current != 0){
+                    above += current;
+                    board[j][i - 1] = above;
+                    board[j][i] = 0;
+                }else if(above == 0){
+                    board[j][i - 1] = current;
+                    board[j][i] = 0;
+                }
+            }
+        }
     }
 
     private void moveDown(){
+        //TODO Fix, move the same piece too many times
+        System.out.println("Move Down");
+        for(int i = 0; i < board[0].length - 1; i++){
+            for(int j = 0; j < board.length; j++){
+                System.out.printf("i: %d j: %d \n", i, j);
+                int current = board[j][i];
+                int below = board[j][i + 1];
 
+                if(current == below && current != 0){
+                    System.out.printf("Combine %d with %d \n", current, below);
+                    below += current;
+                    board[j][i + 1] = below;
+                    board[j][i] = 0;
+                }else if(below == 0){
+                    System.out.printf("Moving %d \n", current);
+                    board[j][i + 1] = current;
+                    board[j][i] = 0;
+                }
+            }
+        }
     }
 
     private void moveRight(){
-
+        System.out.println("Move Right");
     }
 
     private void moveLeft(){
-
+        System.out.println("Move Left");
     }
 
 

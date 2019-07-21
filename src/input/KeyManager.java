@@ -35,8 +35,6 @@ public class KeyManager implements KeyListener {
         down = keys[KeyEvent.VK_DOWN];
     }
 
-    public void render(Graphics g){}
-
     @Override
     public void keyTyped(KeyEvent e) {
 
