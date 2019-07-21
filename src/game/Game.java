@@ -1,8 +1,11 @@
 package game;
 
 import graphics.Window;
+import input.KeyManager;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
@@ -24,15 +27,130 @@ public class Game implements Runnable{
     private Thread thread;
 
     private Game(){
-        window = new Window(new Dimension(480, 480), "2048");
+        window = new Window(new Dimension(518, 518), "2048");
     }
 
-    private void init(){
+    private int[][] board = new int[4][4];
 
+    private void init(){
+        window.getFrame().addKeyListener(KeyManager.getInstance());
+
+        //Run Game
+        board[0][1] = 2;
+        board[1][1] = 2;
+        board[3][3] = 2;
+    }
+
+    private void tick(){
+        KeyManager.getInstance();
+    }
+
+    private void moveUp(){
+
+    }
+
+    private void moveDown(){
+
+    }
+
+    private void moveRight(){
+
+    }
+
+    private void moveLeft(){
+
+    }
+
+
+    private void render(){
+        bs = window.getCanvas().getBufferStrategy();
+
+        if(bs == null){
+            window.getCanvas().createBufferStrategy(3);
+            return;
+        }
+
+        g = bs.getDrawGraphics();
+
+        g.clearRect(0, 0, (int) window.getSize().getWidth(), (int) window.getSize().getHeight());
+
+        //Add stuff to render here
+        drawBoard(g);
+
+        bs.show();
+        g.dispose();
+    }
+
+    private void drawBoard(Graphics g){
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 50));
+
+        for(int i = 0; i < 4; i++){
+            g.fillRect(130 * i, 0, 2, 518);
+            g.fillRect(0, 130 * i, 518, 2);
+        }
+
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[0].length; j++){
+                if(board[i][j] != 0){
+                    g.setColor(Color.red);
+                    g.fillRect((130 * i) + 2, (130 * j) + 2, 128, 128);
+                    g.setColor(Color.WHITE);
+                    g.drawString(board[i][j] + "", 54 + (130 * i), 74 + (130 * j));
+                }
+            }
+        }
     }
 
     @Override
     public void run() {
+        init();
 
+        int fps = 60;
+        double timePerTick = 1000000000.0 / fps;
+        double delta = 0;
+        long now;
+        long lastTime = System.nanoTime();
+        long timer = 0;
+        int ticks = 0;
+
+        while(running){
+            now = System.nanoTime();
+            delta += (now - lastTime) / timePerTick;
+            timer += now - lastTime;
+            lastTime = now;
+
+            if(delta >= 1){
+                tick();
+                render();
+                ticks++;
+                delta--;
+            }
+
+            if(timer >= 1000000000){
+                System.out.println(ticks);
+                ticks = 0;
+                timer = 0;
+            }
+
+        }
+
+        stop();
+    }
+
+    public synchronized void start(){
+        if(running)return;
+        running = true;
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    public synchronized void stop(){
+        if(!running)return;
+        running = false;
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

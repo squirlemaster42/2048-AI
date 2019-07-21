@@ -16,7 +16,7 @@ public class KeyManager implements KeyListener {
     }
 
     private final boolean[] keys;
-    public boolean w, a, s, d, e, esc;
+    public boolean w, a, s, d, e, esc, left, right, up, down;
 
     private KeyManager(){
         keys = new boolean[256];
@@ -29,6 +29,10 @@ public class KeyManager implements KeyListener {
         d = keys[KeyEvent.VK_D];
         e = keys[KeyEvent.VK_E];
         esc = keys[KeyEvent.VK_ESCAPE];
+        left = keys[KeyEvent.VK_LEFT];
+        right = keys[KeyEvent.VK_RIGHT];
+        up = keys[KeyEvent.VK_UP];
+        down = keys[KeyEvent.VK_DOWN];
     }
 
     public void render(Graphics g){}
