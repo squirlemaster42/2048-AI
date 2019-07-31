@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.Random;
 
 public class Game implements Runnable{
 
@@ -25,6 +26,7 @@ public class Game implements Runnable{
     private BufferStrategy bs;
     private Graphics g;
     private Thread thread;
+    private Random rand;
 
     private Game(){
         window = new Window(new Dimension(518, 518), "2048");
@@ -33,6 +35,7 @@ public class Game implements Runnable{
     private int[][] board = new int[4][4];
 
     private void init(){
+        rand = new Random();
         window.getFrame().addKeyListener(KeyManager.getInstance());
 
         //Run Game
@@ -110,12 +113,44 @@ public class Game implements Runnable{
 
     private void moveRight(){
         System.out.println("Move Right");
+        for(int k = 0; k < board.length; k++){
+
+        }
     }
 
     private void moveLeft(){
         System.out.println("Move Left");
+        for(int k = 0; k < board.length; k++){
+            for(int i = board.length - 1; i > 0; i--){
+                for(int j = 0; j < board[0].length; j++){
+                    int current = board[i][j];
+                    int left = board[i - 1][j];
+
+                    if(current == left && current != 0){
+                        left += current;
+                        board[i][j] = left;
+                        board[i - 1][j] = 0;
+                    }else if(left == 0){
+                        board[i - 1][j] = current;
+                        board[i][j] = 0;
+                    }
+                }
+            }
+        }
     }
 
+    private void addNewTile(){
+        int random = rand.nextInt(4);
+        if(random == 1){
+            //Add 4 tile
+        }else{
+            //Add 2 tile
+        }
+    }
+
+    private void addTileAtRandLocation(int value){
+        //Add tile at random location
+    }
 
     private void render(){
         bs = window.getCanvas().getBufferStrategy();
