@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class Game implements Runnable{
@@ -34,15 +36,18 @@ public class Game implements Runnable{
 
     private int[][] board = new int[4][4];
 
+    private Map<Integer, Color> colorMap;
+
     private void init(){
         rand = new Random();
         window.getFrame().addKeyListener(KeyManager.getInstance());
 
+        colorMap = new HashMap<>();
+        //TODO Add and implement colorMap
+
         //Run Game
-        board[0][0] = 2;
-        board[0][1] = 2;
-        board[1][1] = 2;
-        board[3][3] = 2;
+        addNewTile();
+        addNewTile();
     }
 
     private boolean lock = false;
@@ -64,11 +69,12 @@ public class Game implements Runnable{
             lock = true;
         }
 
-        if(!KeyManager.getInstance().up && !KeyManager.getInstance().down && !KeyManager.getInstance().left && !KeyManager.getInstance().right){
+        if(!KeyManager.getInstance().up && !KeyManager.getInstance().down && !KeyManager.getInstance().left && !KeyManager.getInstance().right) {
             lock = false;
         }
     }
 
+    //TODO Don't move is tiles cannot move
     private void moveUp(){
         System.out.println("Move Up");
         for (int k = 0; k < board.length; k++) {
@@ -88,6 +94,7 @@ public class Game implements Runnable{
                 }
             }
         }
+        addNewTile();
     }
 
     private void moveDown(){
@@ -109,13 +116,29 @@ public class Game implements Runnable{
                 }
             }
         }
+        addNewTile();
     }
 
     private void moveRight(){
         System.out.println("Move Right");
         for(int k = 0; k < board.length; k++){
+            for(int i = board.length - 2; i >= 0; i--){
+                for(int j = 0; j < board[0].length; j++){
+                    int current = board[i][j];
+                    int left = board[i + 1][j];
 
+                    if(current == left && current != 0){
+                        left += current;
+                        board[i][j] = left;
+                        board[i + 1][j] = 0;
+                    }else if(left == 0){
+                        board[i + 1][j] = current;
+                        board[i][j] = 0;
+                    }
+                }
+            }
         }
+        addNewTile();
     }
 
     private void moveLeft(){
@@ -137,19 +160,45 @@ public class Game implements Runnable{
                 }
             }
         }
+        addNewTile();
+    }
+
+    private boolean boardFull(){
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[0].length; j++){
+                if(board[i][j] == 0){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void addNewTile(){
+        if(boardFull()){
+            return;
+        }
         int random = rand.nextInt(4);
         if(random == 1){
-            //Add 4 tile
+            addTileAtRandLocation(4);
         }else{
-            //Add 2 tile
+            addTileAtRandLocation(2);
         }
     }
 
     private void addTileAtRandLocation(int value){
-        //Add tile at random location
+        int i = rand.nextInt(4);
+        int j = rand.nextInt(4);
+        if(board[i][j] == 0){
+            board[i][j] = value;
+        }else{
+            addTileAtRandLocation(value);
+        }
+    }
+
+    private boolean lostBoard(){
+        //TODO Check is board is lost
+        return false;
     }
 
     private void render(){
@@ -163,6 +212,11 @@ public class Game implements Runnable{
         g = bs.getDrawGraphics();
 
         g.clearRect(0, 0, (int) window.getSize().getWidth(), (int) window.getSize().getHeight());
+
+        if(lostBoard()){
+            g.setFont(new Font("TimesRoman", Font.PLAIN, 100));
+            g.drawString("You Loose", 100, 100);
+        }
 
         //Add stuff to render here
         drawBoard(g);
