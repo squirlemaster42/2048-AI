@@ -38,6 +38,8 @@ public class Game implements Runnable{
 
     private Map<Integer, Color> colorMap;
 
+    private boolean addNewTile = true;
+
     private void init(){
         rand = new Random();
         window.getFrame().addKeyListener(KeyManager.getInstance());
@@ -72,6 +74,8 @@ public class Game implements Runnable{
         if(!KeyManager.getInstance().up && !KeyManager.getInstance().down && !KeyManager.getInstance().left && !KeyManager.getInstance().right) {
             lock = false;
         }
+
+        addNewTile = true;
     }
 
     //TODO Don't move is tiles cannot move
@@ -88,6 +92,7 @@ public class Game implements Runnable{
                         board[j][i - 1] = above;
                         board[j][i] = 0;
                     }else if(above == 0){
+                        addNewTile = false;
                         board[j][i - 1] = current;
                         board[j][i] = 0;
                     }
@@ -110,6 +115,7 @@ public class Game implements Runnable{
                         board[j][i] = below;
                         board[j][i + 1] = 0;
                     }else if(below == 0){
+                        addNewTile = false;
                         board[j][i + 1] = current;
                         board[j][i] = 0;
                     }
@@ -132,6 +138,7 @@ public class Game implements Runnable{
                         board[i][j] = left;
                         board[i + 1][j] = 0;
                     }else if(left == 0){
+                        addNewTile = false;
                         board[i + 1][j] = current;
                         board[i][j] = 0;
                     }
@@ -154,6 +161,7 @@ public class Game implements Runnable{
                         board[i][j] = left;
                         board[i - 1][j] = 0;
                     }else if(left == 0){
+                        addNewTile = false;
                         board[i - 1][j] = current;
                         board[i][j] = 0;
                     }
@@ -189,6 +197,9 @@ public class Game implements Runnable{
     private void addTileAtRandLocation(int value){
         int i = rand.nextInt(4);
         int j = rand.nextInt(4);
+        if(!addNewTile){
+            return;
+        }
         if(board[i][j] == 0){
             board[i][j] = value;
         }else{
@@ -197,8 +208,22 @@ public class Game implements Runnable{
     }
 
     private boolean lostBoard(){
-        //TODO Check is board is lost
-        return false;
+        //TODO Test
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[0].length; j++){
+                try{
+                    int currentSpace = board[i][j];
+                    if(board[i][j++] == currentSpace || board[i][j--] == currentSpace || board[i++][j] == currentSpace || board[i--][j] == currentSpace){
+                        if(i == board.length - 1 && j == board[0].length - 1){
+                            return true;
+                        }
+                    }
+                }catch(ArrayIndexOutOfBoundsException e){
+                    //TODO Cleanup
+                }
+            }
+        }
+        return true;
     }
 
     private void render(){
@@ -213,13 +238,14 @@ public class Game implements Runnable{
 
         g.clearRect(0, 0, (int) window.getSize().getWidth(), (int) window.getSize().getHeight());
 
+        //Add stuff to render here
+        drawBoard(g);
+
+        g.setColor(Color.black);
         if(lostBoard()){
             g.setFont(new Font("TimesRoman", Font.PLAIN, 100));
             g.drawString("You Loose", 100, 100);
         }
-
-        //Add stuff to render here
-        drawBoard(g);
 
         bs.show();
         g.dispose();
