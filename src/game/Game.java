@@ -38,7 +38,16 @@ public class Game implements Runnable{
 
     private Map<Integer, Color> colorMap;
 
-    private boolean addNewTile = true;
+    private enum Move {
+            LEFT,
+            RIGHT,
+            UP,
+            DOWN
+    }
+
+    private boolean lostGame = false;
+
+    private Move lastMove;
 
     private void init(){
         rand = new Random();
@@ -57,16 +66,20 @@ public class Game implements Runnable{
     private void tick(){
         KeyManager.getInstance().tick();
 
-        if(KeyManager.getInstance().up && !lock){
+        if(KeyManager.getInstance().up && !lock && lastMove != Move.UP){
+            lastMove = Move.UP;
             moveUp();
             lock = true;
-        }else if(KeyManager.getInstance().down && !lock){
+        }else if(KeyManager.getInstance().down && !lock && lastMove != Move.DOWN){
+            lastMove = Move.DOWN;
             moveDown();
             lock = true;
-        }else if(KeyManager.getInstance().right && !lock){
+        }else if(KeyManager.getInstance().right && !lock && lastMove != Move.RIGHT){
+            lastMove = Move.RIGHT;
             moveRight();
             lock = true;
-        }else if(KeyManager.getInstance().left && !lock){
+        }else if(KeyManager.getInstance().left && !lock && lastMove != Move.LEFT){
+            lastMove = Move.LEFT;
             moveLeft();
             lock = true;
         }
@@ -74,11 +87,9 @@ public class Game implements Runnable{
         if(!KeyManager.getInstance().up && !KeyManager.getInstance().down && !KeyManager.getInstance().left && !KeyManager.getInstance().right) {
             lock = false;
         }
-
-        addNewTile = true;
     }
 
-    //TODO Don't move is tiles cannot move
+    //TODO Fix [2][2][2][2] -> [8] error
     private void moveUp(){
         System.out.println("Move Up");
         for (int k = 0; k < board.length; k++) {
@@ -92,7 +103,6 @@ public class Game implements Runnable{
                         board[j][i - 1] = above;
                         board[j][i] = 0;
                     }else if(above == 0){
-                        addNewTile = false;
                         board[j][i - 1] = current;
                         board[j][i] = 0;
                     }
@@ -115,7 +125,6 @@ public class Game implements Runnable{
                         board[j][i] = below;
                         board[j][i + 1] = 0;
                     }else if(below == 0){
-                        addNewTile = false;
                         board[j][i + 1] = current;
                         board[j][i] = 0;
                     }
@@ -138,7 +147,6 @@ public class Game implements Runnable{
                         board[i][j] = left;
                         board[i + 1][j] = 0;
                     }else if(left == 0){
-                        addNewTile = false;
                         board[i + 1][j] = current;
                         board[i][j] = 0;
                     }
@@ -161,7 +169,6 @@ public class Game implements Runnable{
                         board[i][j] = left;
                         board[i - 1][j] = 0;
                     }else if(left == 0){
-                        addNewTile = false;
                         board[i - 1][j] = current;
                         board[i][j] = 0;
                     }
@@ -197,33 +204,12 @@ public class Game implements Runnable{
     private void addTileAtRandLocation(int value){
         int i = rand.nextInt(4);
         int j = rand.nextInt(4);
-        if(!addNewTile){
-            return;
-        }
         if(board[i][j] == 0){
             board[i][j] = value;
+
         }else{
             addTileAtRandLocation(value);
         }
-    }
-
-    private boolean lostBoard(){
-        //TODO Test
-        for(int i = 0; i < board.length; i++){
-            for(int j = 0; j < board[0].length; j++){
-                try{
-                    int currentSpace = board[i][j];
-                    if(board[i][j++] == currentSpace || board[i][j--] == currentSpace || board[i++][j] == currentSpace || board[i--][j] == currentSpace){
-                        if(i == board.length - 1 && j == board[0].length - 1){
-                            return true;
-                        }
-                    }
-                }catch(ArrayIndexOutOfBoundsException e){
-                    //TODO Cleanup
-                }
-            }
-        }
-        return true;
     }
 
     private void render(){
@@ -242,7 +228,8 @@ public class Game implements Runnable{
         drawBoard(g);
 
         g.setColor(Color.black);
-        if(lostBoard()){
+        if(lostGame){
+            //TODO Fix position
             g.setFont(new Font("TimesRoman", Font.PLAIN, 100));
             g.drawString("You Loose", 100, 100);
         }
